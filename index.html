@@ -1288,8 +1288,7 @@ async function carregarRanking() {
 
   // Monta ranking
   const ranking = sessoes
-    .map(sid => ({apelido: apelidoMap[sid], votos: contagem[sid]}))
-    .filter(r => r.apelido) // só quem tem apelido
+.map(sid => ({apelido: apelidoMap[sid] || `Torcedor #${sid.slice(-4)}`, votos: contagem[sid]}))
     .sort((a,b) => b.votos - a.votos)
     .slice(0, 15);
 
