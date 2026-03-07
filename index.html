@@ -1524,7 +1524,7 @@ user-select:none;}
       <div class="bb-hero-inner">
         <div class="bb-hero-icon">💬</div>
         <h1 class="bb-hero-title">BATE BOLA</h1>
-        <p class="bb-hero-sub">Aqui é o seu espaço para comentar absolutamente tudo que dá na telha quando o assunto é Palmeiras!</p>
+        <p class="bb-hero-sub"O local ideal para comentar absolutamente tudo que dá na telha quando o assunto é Palmeiras!</p>
         <div class="bb-controls">
           <div class="bb-search-wrap">
             <input type="text" class="bb-search" id="bbSearch" placeholder="Procurar assuntos..." oninput="bbFiltrar()"/>
@@ -3384,11 +3384,10 @@ let bbIniciado = false;
 
 // Auth
 async function bbInitAuth(){
-  const { data: { session } } = await sb.auth.getSession();
-  if(session?.user) await bbSetUsuario(session.user);
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if(session?.user) await bbSetUsuario(session.user);
-    else { bbUsuario = null; bbAtualizarBtnUser(); }
+  const { data: { session } } = await sb.auth.onAuthStateChange(async (event, session) => {
+  if(event === 'SIGNED_OUT'){ bbUsuario = null; bbAtualizarBtnUser(); return; }
+  if(event === 'SIGNED_IN' && session?.user) await bbSetUsuario(session.user);
+});
   });
 }
 
