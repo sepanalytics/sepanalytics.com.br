@@ -3384,10 +3384,12 @@ let bbIniciado = false;
 
 // Auth
 async function bbInitAuth(){
-  const { data: { session } } = await sb.auth.onAuthStateChange(async (event, session) => {
-  if(event === 'SIGNED_OUT'){ bbUsuario = null; bbAtualizarBtnUser(); return; }
-  if(event === 'SIGNED_IN' && session?.user) await bbSetUsuario(session.user);
-});
+  const { data: { session } } = await sb.auth.getSession();
+  if(session?.user) await bbSetUsuario(session.user);
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if(event === 'SIGNED_OUT'){ bbUsuario = null; bbAtualizarBtnUser(); return; }
+    if(event === 'SIGNED_IN' && session?.user) await bbSetUsuario(session.user);
   });
 }
 
