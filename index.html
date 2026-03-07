@@ -3737,7 +3737,7 @@ async function bbPublicarTopico(){
   }
   const {error}=await sb.from('bb_topicos').insert({usuario_id:bbUsuario.id,categoria:bbCatSelecionada,titulo,subtitulo:subtitulo||null,conteudo,capa_url});
   btn.disabled=false; btn.textContent='🚀 PUBLICAR';
-  if(error){toast('❌ Erro: '+error.message);return;}
+  if(error){   btn.disabled=false;   btn.textContent='🚀 PUBLICAR';   toast('❌ Erro: '+error.message);   return; }
   toast('🎉 Tópico publicado!'); fecharCriar(); await bbCarregar();
 }
 
