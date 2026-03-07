@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bate-Bola · Palmeiras</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --g:#125600;--g2:#1d7a00;--glow:#2ef06a;
+  --bg:#080808;--s1:#111;--s2:#181818;--s3:#202020;
+  --border:#242424;--border2:#2e2e2e;
+  --txt:#e8e8e8;--txt2:#888;--txt3:#444;
+  --gold:#d4a843;--red:#c0392b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:0;}
+
+/* ── HEADER ── */
+header{background:rgba(5,5,5,.98);border-bottom:1px solid rgba(46,240,106,.12);position:sticky;top:0;z-index:200;backdrop-filter:blur(20px);}
+.hdr{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer;}
+.logo-emblem{width:34px;height:34px;}
+.logo-emblem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 10px rgba(46,240,106,.35));}
+.logo-name{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;background:linear-gradient(90deg,#fff,#c8c8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-name em{background:linear-gradient(135deg,#2ef06a,#1dc455);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+nav{display:flex;align-items:center;gap:4px;}
+.nav-link{color:var(--txt3);font-size:12px;font-weight:500;padding:6px 12px;border-radius:4px;transition:all .15s;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;}
+.nav-link:hover{color:var(--txt);background:var(--s2);}
+.nav-link.on{color:#fff;background:var(--g);position:relative;}
+.nav-link.on::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:100%;height:2px;background:var(--glow);border-radius:1px;}
+.btn-user-area{background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:500;padding:5px 12px;cursor:pointer;transition:all .15s;letter-spacing:.5px;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;}
+.btn-user-area:hover{border-color:var(--txt3);color:var(--txt2);}
+.btn-user-area.logado{border-color:var(--g);color:var(--glow);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--s1);border:1px solid rgba(46,240,106,.2);color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* ── OVERLAYS / MODAIS ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:16px;padding:36px 32px;width:360px;text-align:center;}
+.modal h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;margin-bottom:6px;}
+.modal p{color:var(--txt3);font-size:13px;margin-bottom:24px;}
+.modal-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+.modal-tab{flex:1;background:transparent;border:none;color:var(--txt3);font-size:13px;font-weight:600;padding:9px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+.modal-tab.on{background:var(--g);color:#fff;}
+.modal input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:#fff;padding:12px;font-family:'Inter',sans-serif;font-size:14px;outline:none;margin-bottom:10px;transition:border-color .2s;}
+.modal input:focus{border-color:var(--g2);}
+.modal input::placeholder{color:var(--txt3);}
+.btn-login{width:100%;background:var(--g);color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:background .15s;}
+.btn-login:hover{background:var(--g2);}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;}
+.modal-err{color:#e74c3c;font-size:12px;margin-top:8px;min-height:16px;}
+.modal-ok{color:var(--glow);font-size:12px;margin-top:8px;min-height:16px;}
+.btn-close-modal{background:none;border:none;color:var(--txt3);font-size:12px;margin-top:14px;cursor:pointer;display:block;width:100%;}
+.divider-or{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--txt3);font-size:12px;}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--border2);}
+.btn-google{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--txt);padding:11px;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
+.btn-google:hover{border-color:var(--txt2);}
+
+/* ── HERO BATE-BOLA ── */
+.bb-hero{position:relative;background:linear-gradient(160deg,#050f05 0%,#080808 55%,#060606 100%);border-bottom:1px solid var(--border);padding:52px 40px 36px;overflow:hidden;}
+.bb-hero::before{content:'';position:absolute;top:-120px;left:-80px;width:600px;height:600px;background:radial-gradient(circle,rgba(18,86,0,.22),transparent 65%);pointer-events:none;}
+
+.bb-hero::after{content:'';position:absolute;bottom:-60px;right:5%;width:300px;height:300px;background:radial-gradient(circle,rgba(46,240,106,.05),transparent 65%);pointer-events:none;}
+.bb-hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;}
+.bb-hero-icon{width:54px;height:54px;background:rgba(46,240,106,.08);border:1px solid rgba(46,240,106,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px;}
+.bb-hero-title{font-family:'Oswald',sans-serif;font-size:clamp(52px,8vw,88px);font-weight:900;letter-spacing:4px;color:#fff;line-height:.95;margin-bottom:14px;text-transform:uppercase;}
+.bb-hero-sub{font-size:14px;color:var(--txt3);line-height:1.6;max-width:420px;margin-bottom:32px;}
+.bb-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.bb-search-wrap{position:relative;flex:1;min-width:200px;max-width:380px;}
+.bb-search{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:8px;color:#fff;padding:11px 42px 11px 16px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.bb-search:focus{border-color:var(--g2);}
+.bb-search::placeholder{color:var(--txt3);}
+.bb-search-ico{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--glow);}
+.btn-criar{background:var(--g);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;text-transform:uppercase;}
+.btn-criar:hover{background:var(--g2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(46,240,106,.2);}
+.bb-filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px;}
+.bb-filter{background:transparent;border:1px solid var(--border2);border-radius:20px;color:var(--txt3);font-size:13px;font-weight:500;padding:7px 16px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+.bb-filter:hover{border-color:var(--txt2);color:var(--txt);}
+.bb-filter.on{background:rgba(46,240,106,.1);border-color:rgba(46,240,106,.4);color:var(--glow);}
+
+/* ── GRID DE TÓPICOS ── */
+.bb-content{max-width:1200px;margin:0 auto;padding:32px 40px 80px;}
+.bb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.topico-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;}
+.topico-card:hover{border-color:rgba(46,240,106,.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.tc-capa{width:100%;height:170px;object-fit:cover;background:var(--s3);display:block;}
+.tc-capa-placeholder{width:100%;height:170px;background:linear-gradient(135deg,#0a1a0a,var(--s3));display:flex;align-items:center;justify-content:center;font-size:40px;color:rgba(46,240,106,.15);}
+.tc-body{padding:18px 18px 14px;flex:1;display:flex;flex-direction:column;}
+.tc-cat{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;padding:3px 9px;border-radius:4px;width:fit-content;}
+.tc-titulo{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:.3px;margin-bottom:6px;line-height:1.25;}
+.tc-preview{font-size:12px;color:var(--txt3);line-height:1.6;flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.tc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.tc-autor{display:flex;align-items:center;gap:8px;}
+.tc-avatar{width:24px;height:24px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;}
+.tc-avatar img{width:100%;height:100%;object-fit:cover;}
+.tc-autor-nome{font-size:12px;color:var(--txt2);}
+.tc-meta{display:flex;align-items:center;gap:10px;}
+.tc-meta-item{font-size:11px;color:var(--txt3);display:flex;align-items:center;gap:4px;}
+
+/* ── CATEGORIAS CORES ── */
+.cat-criticas{background:rgba(192,57,43,.15);color:#e74c3c;border:1px solid rgba(192,57,43,.3);}
+.cat-reforcos{background:rgba(212,168,67,.12);color:var(--gold);border:1px solid rgba(212,168,67,.3);}
+.cat-base{background:rgba(46,240,106,.1);color:var(--glow);border:1px solid rgba(46,240,106,.25);}
+.cat-resenha{background:rgba(155,89,182,.12);color:#a855f7;border:1px solid rgba(155,89,182,.3);}
+.cat-prejogo-analitico{background:rgba(52,152,219,.12);color:#3b9edd;border:1px solid rgba(52,152,219,.3);}
+.cat-prejogo-emocional{background:rgba(46,240,106,.1);color:var(--glow);border:1px solid rgba(46,240,106,.25);}
+.cat-geral{background:rgba(100,100,100,.12);color:var(--txt2);border:1px solid rgba(100,100,100,.2);}
+
+/* ── TÓPICO ABERTO ── */
+.topico-view{display:none;max-width:820px;margin:0 auto;padding:36px 40px 80px;}
+.topico-view.open{display:block;}
+.btn-voltar{background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:12px;padding:7px 16px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:6px;margin-bottom:28px;}
+.btn-voltar:hover{border-color:var(--txt2);color:var(--txt);}
+.tv-cat-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;padding:4px 12px;border-radius:5px;}
+.tv-titulo{font-family:'Oswald',sans-serif;font-size:clamp(28px,5vw,44px);font-weight:900;color:#fff;letter-spacing:1px;line-height:1.1;margin-bottom:14px;}
+.tv-meta{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+.tv-autor-info{display:flex;align-items:center;gap:9px;}
+.tv-avatar{width:30px;height:30px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;overflow:hidden;}
+.tv-avatar img{width:100%;height:100%;object-fit:cover;}
+.tv-autor-nome{font-size:13px;color:var(--txt2);font-weight:600;}
+.tv-data{font-size:12px;color:var(--txt3);}
+.tv-capa{width:100%;border-radius:12px;margin-bottom:32px;border:1px solid var(--border);}
+.tv-conteudo{font-size:15px;color:var(--txt2);line-height:1.8;margin-bottom:40px;}
+.tv-conteudo p{margin-bottom:14px;}
+.tv-conteudo strong{color:#fff;font-weight:700;}
+.tv-conteudo em{color:var(--txt);font-style:italic;}
+.tv-conteudo h2{font-family:'Oswald',sans-serif;font-size:22px;color:#fff;margin:24px 0 12px;letter-spacing:.5px;}
+.tv-actions{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:36px;}
+.btn-like{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--txt3);font-size:13px;font-weight:600;padding:8px 18px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:7px;}
+.btn-like:hover{border-color:var(--glow);color:var(--glow);}
+.btn-like.liked{background:rgba(46,240,106,.1);border-color:rgba(46,240,106,.4);color:var(--glow);}
+.btn-del-topico{background:transparent;border:1px solid rgba(192,57,43,.3);border-radius:8px;color:#e74c3c;font-size:12px;padding:8px 16px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;margin-left:auto;}
+.btn-del-topico:hover{background:rgba(192,57,43,.1);}
+
+/* ── COMENTÁRIOS ── */
+.comentarios-section{margin-top:8px;}
+.com-title{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;color:#fff;margin-bottom:4px;}
+.com-count{font-size:12px;color:var(--txt3);margin-bottom:24px;}
+.com-form{display:flex;gap:12px;margin-bottom:32px;align-items:flex-start;}
+.com-form-avatar{width:36px;height:36px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;}
+.com-form-avatar img{width:100%;height:100%;object-fit:cover;}
+.com-input-wrap{flex:1;}
+.com-textarea{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:#fff;padding:12px 16px;font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;transition:border-color .2s;line-height:1.6;}
+.com-textarea:focus{border-color:var(--g2);}
+.com-textarea::placeholder{color:var(--txt3);}
+.com-form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.com-hint{font-size:11px;color:var(--txt3);letter-spacing:.3px;}
+.btn-comentar{background:var(--g);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:7px;text-transform:uppercase;}
+.btn-comentar:hover{background:var(--g2);}
+.btn-comentar:disabled{opacity:.4;cursor:not-allowed;}
+.com-nao-logado{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:16px 20px;text-align:center;font-size:13px;color:var(--txt3);margin-bottom:28px;}
+.com-nao-logado a{color:var(--glow);cursor:pointer;text-decoration:none;}
+.com-nao-logado a:hover{text-decoration:underline;}
+.com-list{display:flex;flex-direction:column;gap:0;}
+.comentario{padding:18px 0;border-bottom:1px solid var(--border);}
+.comentario:last-child{border-bottom:none;}
+.com-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.com-avatar{width:30px;height:30px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;}
+.com-avatar img{width:100%;height:100%;object-fit:cover;}
+.com-autor{font-size:13px;font-weight:600;color:var(--txt);}
+.com-data{font-size:11px;color:var(--txt3);margin-left:4px;}
+.com-texto{font-size:14px;color:var(--txt2);line-height:1.65;margin-bottom:10px;padding-left:40px;}
+.com-acoes{display:flex;align-items:center;gap:12px;padding-left:40px;}
+.btn-like-com{background:none;border:none;color:var(--txt3);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;transition:color .15s;padding:0;}
+.btn-like-com:hover{color:var(--glow);}
+.btn-like-com.liked{color:var(--glow);}
+.btn-reply{background:none;border:none;color:var(--txt3);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:color .15s;padding:0;}
+.btn-reply:hover{color:var(--txt2);}
+.btn-del-com{background:none;border:none;color:#e74c3c;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s;padding:0;margin-left:auto;opacity:.6;}
+.btn-del-com:hover{opacity:1;}
+/* replies */
+.replies{padding-left:40px;margin-top:12px;display:flex;flex-direction:column;gap:0;border-left:2px solid var(--border);padding-left:16px;margin-left:40px;}
+.reply{padding:12px 0;border-bottom:1px solid rgba(36,36,36,.5);}
+.reply:last-child{border-bottom:none;}
+.reply-form{margin-top:10px;margin-left:40px;}
+.reply-form textarea{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:8px;color:#fff;padding:10px 14px;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:none;min-height:60px;transition:border-color .2s;}
+.reply-form textarea:focus{border-color:var(--g2);}
+.reply-form-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+.btn-reply-cancel{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:12px;padding:6px 14px;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-reply-send{background:var(--g);color:#fff;border:none;border-radius:6px;padding:6px 16px;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;}
+.btn-reply-send:hover{background:var(--g2);}
+
+/* ── CRIAR TÓPICO MODAL ── */
+.criar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:600;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px;}
+.criar-overlay.open{display:flex;}
+.criar-modal{background:var(--s1);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:700px;margin:auto;overflow:hidden;}
+.criar-header{padding:28px 32px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.criar-title{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;color:#fff;}
+.btn-fechar-criar{background:var(--s2);border:1px solid var(--border2);border-radius:50%;width:32px;height:32px;color:var(--txt3);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.btn-fechar-criar:hover{color:#fff;border-color:var(--txt2);}
+.criar-body{padding:28px 32px;}
+.criar-field{margin-bottom:20px;}
+.criar-label{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;display:block;font-weight:600;}
+.criar-input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:#fff;padding:12px 16px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.criar-input:focus{border-color:var(--g2);}
+.criar-input::placeholder{color:var(--txt3);}
+/* Categorias */
+.cats-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.cat-btn{background:transparent;border:1px solid var(--border2);border-radius:20px;color:var(--txt3);font-size:13px;font-weight:500;padding:7px 16px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+.cat-btn:hover{border-color:var(--txt2);color:var(--txt);}
+.cat-btn.on.criticas{background:rgba(192,57,43,.15);border-color:rgba(192,57,43,.5);color:#e74c3c;}
+.cat-btn.on.reforcos{background:rgba(212,168,67,.12);border-color:rgba(212,168,67,.4);color:var(--gold);}
+.cat-btn.on.base{background:rgba(46,240,106,.1);border-color:rgba(46,240,106,.4);color:var(--glow);}
+.cat-btn.on.resenha{background:rgba(155,89,182,.12);border-color:rgba(155,89,182,.4);color:#a855f7;}
+.cat-btn.on.prejogo-analitico{background:rgba(52,152,219,.12);border-color:rgba(52,152,219,.4);color:#3b9edd;}
+.cat-btn.on.prejogo-emocional{background:rgba(46,240,106,.1);border-color:rgba(46,240,106,.4);color:var(--glow);}
+/* Editor rich text */
+.editor-toolbar{display:flex;gap:4px;margin-bottom:6px;background:var(--s3);border:1px solid var(--border2);border-radius:8px 8px 0 0;padding:8px 10px;}
+.tb-btn{background:var(--s2);border:1px solid var(--border2);border-radius:5px;color:var(--txt2);font-size:13px;font-weight:700;width:30px;height:28px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.tb-btn:hover{background:var(--s1);color:#fff;}
+.tb-btn.on{background:var(--g);border-color:var(--g2);color:#fff;}
+.editor-area{width:100%;min-height:160px;background:var(--s2);border:1px solid var(--border2);border-top:none;border-radius:0 0 8px 8px;color:#fff;padding:14px 16px;font-family:'Inter',sans-serif;font-size:14px;outline:none;line-height:1.7;resize:vertical;}
+.editor-area[contenteditable]:empty::before{content:attr(data-placeholder);color:var(--txt3);}
+/* Imagem de capa */
+.capa-upload{border:2px dashed var(--border2);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.capa-upload:hover{border-color:var(--g2);}
+.capa-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.capa-preview{width:100%;height:160px;object-fit:cover;border-radius:8px;display:none;}
+.capa-upload-txt{font-size:13px;color:var(--txt3);}
+.capa-upload-txt span{color:var(--glow);}
+.criar-footer{padding:20px 32px 28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px;}
+.btn-publicar{background:var(--g);color:#fff;border:none;border-radius:10px;padding:13px 28px;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-publicar:hover{background:var(--g2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(46,240,106,.25);}
+.btn-publicar:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-cancelar{background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--txt3);font-size:14px;padding:13px 20px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-cancelar:hover{border-color:var(--txt2);color:var(--txt);}
+
+/* ── EMPTY / LOADING ── */
+.bb-empty{text-align:center;padding:80px 20px;color:var(--txt3);}
+.bb-empty-ico{font-size:52px;margin-bottom:16px;opacity:.3;}
+.bb-empty h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--txt2);margin-bottom:8px;letter-spacing:2px;}
+.bb-empty p{font-size:13px;line-height:1.6;}
+.spin{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--g2);border-radius:50%;animation:rot .7s linear infinite;margin:40px auto;}
+@keyframes rot{to{transform:rotate(360deg);}}
+
+@media(max-width:700px){
+  .bb-hero{padding:36px 20px 28px;}
+  .bb-content{padding:24px 20px 60px;}
+  .topico-view{padding:24px 20px 60px;}
+  .criar-body,.criar-header,.criar-footer{padding-left:20px;padding-right:20px;}
+  .bb-grid{grid-template-columns:1fr;}
+  nav .nav-link{font-size:10px;padding:5px 8px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL LOGIN/CADASTRO -->
+<div class="overlay" id="authOverlay">
+  <div class="modal">
+    <h2>🔐 ENTRAR</h2>
+    <p>Acesse para participar do Bate-Bola</p>
+    <div class="modal-tabs">
+      <button class="modal-tab on" id="tabLogin" onclick="switchAuthTab('login')">Entrar</button>
+      <button class="modal-tab" id="tabCadastro" onclick="switchAuthTab('cadastro')">Cadastrar</button>
+    </div>
+    <button class="btn-google" onclick="loginGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar com Google
+    </button>
+    <div class="divider-or">ou</div>
+    <div id="authFields">
+      <input type="email" id="authEmail" placeholder="Seu e-mail"/>
+      <input type="password" id="authPassword" placeholder="Senha (mín. 6 caracteres)"/>
+      <input type="text" id="authNome" placeholder="Seu apelido (ex: Torcedor Verde)" style="display:none"/>
+    </div>
+    <button class="btn-login" id="btnAuthAction" onclick="doAuth()">ENTRAR</button>
+    <div class="modal-err" id="authErr"></div>
+    <div class="modal-ok" id="authOk"></div>
+    <button class="btn-close-modal" onclick="closeAuthModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- CRIAR TÓPICO MODAL -->
+<div class="criar-overlay" id="criarOverlay">
+  <div class="criar-modal">
+    <div class="criar-header">
+      <div class="criar-title">✍️ CRIAR TÓPICO</div>
+      <button class="btn-fechar-criar" onclick="fecharCriar()">✕</button>
+    </div>
+    <div class="criar-body">
+
+      <!-- Categoria -->
+      <div class="criar-field">
+        <label class="criar-label">Categoria</label>
+        <div class="cats-grid">
+          <button class="cat-btn criticas" data-cat="Críticas 😤" onclick="selecionarCat(this)">Críticas 😤</button>
+          <button class="cat-btn reforcos" data-cat="Reforços 💰" onclick="selecionarCat(this)">Reforços 💰</button>
+          <button class="cat-btn base" data-cat="Base ⚽" onclick="selecionarCat(this)">Base ⚽</button>
+          <button class="cat-btn resenha" data-cat="Resenha 😂" onclick="selecionarCat(this)">Resenha 😂</button>
+          <button class="cat-btn prejogo-analitico" data-cat="Pré-jogo 📊" onclick="selecionarCat(this)">Pré-jogo 📊</button>
+          <button class="cat-btn prejogo-emocional" data-cat="Pré-jogo 💚" onclick="selecionarCat(this)">Pré-jogo 💚</button>
+        </div>
+      </div>
+
+      <!-- Imagem de capa -->
+      <div class="criar-field">
+        <label class="criar-label">Imagem de Capa</label>
+        <div class="capa-upload" id="capaUpload">
+          <input type="file" accept="image/*" id="capaInput" onchange="previewCapa(this)"/>
+          <img class="capa-preview" id="capaPreview"/>
+          <div class="capa-upload-txt" id="capaUploadTxt">
+            📸 <span>Clique para escolher</span> uma imagem de capa
+          </div>
+        </div>
+      </div>
+
+      <!-- Título -->
+      <div class="criar-field">
+        <label class="criar-label">Título</label>
+        <input type="text" class="criar-input" id="topicoTitulo" placeholder="Dê um título impactante ao seu tópico..."/>
+      </div>
+
+      <!-- Subtítulo -->
+      <div class="criar-field">
+        <label class="criar-label">Subtítulo <span style="color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+        <input type="text" class="criar-input" id="topicoSubtitulo" placeholder="Um subtítulo complementar..."/>
+      </div>
+
+      <!-- Editor -->
+      <div class="criar-field">
+        <label class="criar-label">Conteúdo</label>
+        <div class="editor-toolbar">
+          <button class="tb-btn" title="Negrito" onclick="formatText('bold')"><b>B</b></button>
+          <button class="tb-btn" title="Itálico" onclick="formatText('italic')"><i>I</i></button>
+          <button class="tb-btn" title="Sublinhado" onclick="formatText('underline')"><u>U</u></button>
+          <div style="width:1px;background:var(--border2);margin:0 4px;"></div>
+          <button class="tb-btn" title="Título" onclick="formatText('h2')" style="font-size:11px;width:auto;padding:0 8px;">H2</button>
+          <button class="tb-btn" title="Inserir link" onclick="inserirLink()" style="width:auto;padding:0 8px;font-size:12px;">🔗</button>
+        </div>
+        <div class="editor-area" id="editorArea" contenteditable="true" data-placeholder="Escreva o seu conteúdo aqui..."></div>
+      </div>
+
+    </div>
+    <div class="criar-footer">
+      <button class="btn-cancelar" onclick="fecharCriar()">Cancelar</button>
+      <button class="btn-publicar" id="btnPublicar" onclick="publicarTopico()">🚀 PUBLICAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr">
+    <a class="logo" href="index.html">
+      <div class="logo-emblem"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Palmeiras_logo.svg/330px-Palmeiras_logo.svg.png" alt="Palmeiras"/></div>
+      <div class="logo-name">VERDÔ<em>METRO</em></div>
+    </a>
+    <nav>
+      <div style="display:flex;gap:2px">
+        <a class="nav-link" href="index.html">Verdômetro</a>
+        <a class="nav-link" href="index.html#escalacao">Escalação</a>
+        <a class="nav-link" href="index.html#analises">Análises</a>
+        <a class="nav-link" href="index.html#torcida">Torcida</a>
+        <a class="nav-link" href="index.html#colunas">Colunas</a>
+        <a class="nav-link on" href="bate-bola.html">Bate-Bola 💬</a>
+      </div>
+      <button class="btn-user-area" id="btnUserArea" onclick="handleUserBtn()">👤 Entrar</button>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO BATE-BOLA -->
+<div id="viewLista">
+  <div class="bb-hero">
+    <div class="bb-hero-inner">
+      <div class="bb-hero-icon">💬</div>
+      <h1 class="bb-hero-title">BATE BOLA</h1>
+      <p class="bb-hero-sub">Aqui é o seu espaço para comentar absolutamente tudo que dá na telha quando o assunto é Palmeiras!</p>
+      <div class="bb-controls">
+        <div class="bb-search-wrap">
+          <input type="text" class="bb-search" id="bbSearch" placeholder="Procurar assuntos..." oninput="filtrarTopicos()"/>
+          <span class="bb-search-ico">🔍</span>
+        </div>
+        <button class="btn-criar" onclick="abrirCriar()">✍️ Criar seu tópico</button>
+      </div>
+      <div class="bb-filters">
+        <button class="bb-filter on" data-cat="Todos 🔥" onclick="filtrarCat(this)">Todos 🔥</button>
+        <button class="bb-filter" data-cat="Críticas 😤" onclick="filtrarCat(this)">Críticas 😤</button>
+        <button class="bb-filter" data-cat="Reforços 💰" onclick="filtrarCat(this)">Reforços 💰</button>
+        <button class="bb-filter" data-cat="Base ⚽" onclick="filtrarCat(this)">Base ⚽</button>
+        <button class="bb-filter" data-cat="Resenha 😂" onclick="filtrarCat(this)">Resenha 😂</button>
+        <button class="bb-filter" data-cat="Pré-jogo 📊" onclick="filtrarCat(this)">Pré-jogo 📊</button>
+        <button class="bb-filter" data-cat="Pré-jogo 💚" onclick="filtrarCat(this)">Pré-jogo 💚</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRID -->
+  <div class="bb-content">
+    <div id="bbGrid" class="bb-grid">
+      <div class="spin"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TÓPICO ABERTO -->
+<div class="topico-view" id="viewTopico">
+  <div style="max-width:820px;margin:0 auto;padding-top:36px;">
+    <button class="btn-voltar" onclick="voltarLista()">← Voltar</button>
+    <div id="topicoConteudo"></div>
+    <div id="comentariosArea"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dnrwsxxfiptzfyimfvdv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucndzeHhmaXB0emZ5aW1mdmR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTk0MDIsImV4cCI6MjA4ODIzNTQwMn0.W_LfK0vHyaOrLSYWEdR3AlGBBV5_GZ7baYoyHFGRnIk';
+const ADMIN_EMAIL = 'marucci@admin.com'; // Troque pelo seu email de admin
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let usuarioAtual = null;
+let todosTopicos = [];
+let catAtiva = 'Todos 🔥';
+let topicoAbertoId = null;
+let capaBase64 = null;
+
+// ── UTILS ──
+function toast(msg, dur=3000){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function timeAgo(dateStr){
+  const diff = (Date.now() - new Date(dateStr)) / 1000;
+  if(diff < 60) return 'agora';
+  if(diff < 3600) return `${Math.floor(diff/60)}min`;
+  if(diff < 86400) return `${Math.floor(diff/3600)}h`;
+  if(diff < 2592000) return `${Math.floor(diff/86400)}d`;
+  return new Date(dateStr).toLocaleDateString('pt-BR');
+}
+
+function getIniciais(nome){
+  if(!nome) return '?';
+  return nome.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+}
+
+function catParaSlug(cat){
+  return cat.toLowerCase().replace(/\s+/g,'').replace(/[^\w]/g,'').replace('críticas','criticas').replace('reforços','reforcos').replace('préjogo','prejogo');
+}
+
+function getCatClass(cat){
+  const slug = catParaSlug(cat);
+  return `cat-${slug}`;
+}
+
+// ── AUTH ──
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session?.user) await setUsuario(session.user);
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if(session?.user) await setUsuario(session.user);
+    else { usuarioAtual = null; atualizarBtnUser(); }
+  });
+}
+
+async function setUsuario(user){
+  // Busca ou cria perfil
+  const { data: perfil } = await sb.from('bb_perfis').select('*').eq('id', user.id).single();
+  if(!perfil){
+    const nome = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Torcedor';
+    await sb.from('bb_perfis').insert({ id: user.id, nome, avatar_url: user.user_metadata?.avatar_url || null });
+    usuarioAtual = { ...user, nome, avatar_url: user.user_metadata?.avatar_url };
+  } else {
+    usuarioAtual = { ...user, nome: perfil.nome, avatar_url: perfil.avatar_url };
+  }
+  atualizarBtnUser();
+}
+
+function atualizarBtnUser(){
+  const btn = document.getElementById('btnUserArea');
+  if(usuarioAtual){
+    btn.textContent = `👤 ${usuarioAtual.nome}`;
+    btn.classList.add('logado');
+  } else {
+    btn.textContent = '👤 Entrar';
+    btn.classList.remove('logado');
+  }
+}
+
+function handleUserBtn(){
+  if(usuarioAtual) {
+    if(confirm(`Deseja sair da conta ${usuarioAtual.nome}?`)) {
+      sb.auth.signOut();
+      toast('👋 Até logo!');
+    }
+  } else {
+    document.getElementById('authOverlay').classList.add('open');
+  }
+}
+
+function switchAuthTab(tab){
+  document.getElementById('tabLogin').classList.toggle('on', tab==='login');
+  document.getElementById('tabCadastro').classList.toggle('on', tab==='cadastro');
+  document.getElementById('authNome').style.display = tab==='cadastro' ? 'block' : 'none';
+  document.getElementById('btnAuthAction').textContent = tab==='cadastro' ? 'CRIAR CONTA' : 'ENTRAR';
+  document.getElementById('authErr').textContent = '';
+  document.getElementById('authOk').textContent = '';
+}
+
+async function loginGoogle(){
+  const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+  if(error) document.getElementById('authErr').textContent = error.message;
+}
+
+async function doAuth(){
+  const tab = document.getElementById('tabLogin').classList.contains('on') ? 'login' : 'cadastro';
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPassword').value;
+  const nome = document.getElementById('authNome').value.trim();
+  const errEl = document.getElementById('authErr');
+  const okEl = document.getElementById('authOk');
+  const btn = document.getElementById('btnAuthAction');
+  errEl.textContent = ''; okEl.textContent = '';
+
+  if(!email || !pass){ errEl.textContent = 'Preencha todos os campos.'; return; }
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  if(tab === 'login'){
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error){ errEl.textContent = 'Email ou senha incorretos.'; }
+    else { closeAuthModal(); toast('✅ Bem-vindo de volta!'); }
+  } else {
+    if(!nome){ errEl.textContent = 'Escolha um apelido.'; btn.disabled=false; btn.textContent='CRIAR CONTA'; return; }
+    const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: nome } } });
+    if(error){ errEl.textContent = error.message; }
+    else {
+      okEl.textContent = '📧 Verifique seu e-mail para confirmar o cadastro!';
+    }
+  }
+  btn.disabled = false;
+  btn.textContent = tab === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
+}
+
+function closeAuthModal(){
+  document.getElementById('authOverlay').classList.remove('open');
+  document.getElementById('authErr').textContent = '';
+  document.getElementById('authOk').textContent = '';
+}
+
+// ── TÓPICOS ──
+async function carregarTopicos(){
+  const { data, error } = await sb
+    .from('bb_topicos')
+    .select('*, bb_perfis(nome, avatar_url), bb_comentarios(count), bb_likes(count)')
+    .order('criado_em', { ascending: false });
+
+  if(error){ console.error(error); return; }
+  todosTopicos = data || [];
+  renderTopicos();
+}
+
+function renderTopicos(){
+  const grid = document.getElementById('bbGrid');
+  const busca = document.getElementById('bbSearch').value.toLowerCase();
+  let lista = todosTopicos;
+
+  if(catAtiva !== 'Todos 🔥') lista = lista.filter(t => t.categoria === catAtiva);
+  if(busca) lista = lista.filter(t => t.titulo.toLowerCase().includes(busca) || (t.conteudo||'').toLowerCase().includes(busca));
+
+  if(!lista.length){
+    grid.innerHTML = `<div class="bb-empty" style="grid-column:1/-1">
+      <div class="bb-empty-ico">💬</div>
+      <h2>NENHUM TÓPICO</h2>
+      <p>Seja o primeiro a criar um tópico nessa categoria!</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = lista.map(t => {
+    const catSlug = catParaSlug(t.categoria || 'geral');
+    const preview = t.conteudo ? t.conteudo.replace(/<[^>]+>/g, '').slice(0, 120) : '';
+    const nomeAutor = t.bb_perfis?.nome || 'Anônimo';
+    const avatarAutor = t.bb_perfis?.avatar_url;
+    const totalComentarios = t.bb_comentarios?.[0]?.count || 0;
+    const totalLikes = t.bb_likes?.[0]?.count || 0;
+
+    return `<div class="topico-card" onclick="abrirTopico('${t.id}')">
+      ${t.capa_url
+        ? `<img class="tc-capa" src="${t.capa_url}" alt="" loading="lazy"/>`
+        : `<div class="tc-capa-placeholder">⚽</div>`}
+      <div class="tc-body">
+        <div class="tc-cat cat-${catSlug}">${t.categoria || 'Geral'}</div>
+        <div class="tc-titulo">${t.titulo}</div>
+        ${preview ? `<div class="tc-preview">${preview}</div>` : ''}
+        <div class="tc-footer">
+          <div class="tc-autor">
+            <div class="tc-avatar">
+              ${avatarAutor ? `<img src="${avatarAutor}"/>` : getIniciais(nomeAutor)}
+            </div>
+            <div class="tc-autor-nome">${nomeAutor}</div>
+          </div>
+          <div class="tc-meta">
+            <div class="tc-meta-item">💬 ${totalComentarios}</div>
+            <div class="tc-meta-item">❤️ ${totalLikes}</div>
+            <div class="tc-meta-item">${timeAgo(t.criado_em)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filtrarCat(btn){
+  document.querySelectorAll('.bb-filter').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  catAtiva = btn.dataset.cat;
+  renderTopicos();
+}
+
+function filtrarTopicos(){ renderTopicos(); }
+
+// ── ABRIR TÓPICO ──
+async function abrirTopico(id){
+  topicoAbertoId = id;
+  document.getElementById('viewLista').style.display = 'none';
+  document.getElementById('viewTopico').classList.add('open');
+  document.getElementById('topicoConteudo').innerHTML = '<div class="spin"></div>';
+  document.getElementById('comentariosArea').innerHTML = '';
+  window.scrollTo(0,0);
+
+  const { data: t, error } = await sb
+    .from('bb_topicos')
+    .select('*, bb_perfis(nome, avatar_url)')
+    .eq('id', id).single();
+
+  if(error || !t){ toast('❌ Tópico não encontrado.'); voltarLista(); return; }
+
+  const catSlug = catParaSlug(t.categoria || 'geral');
+  const nomeAutor = t.bb_perfis?.nome || 'Anônimo';
+  const avatarAutor = t.bb_perfis?.avatar_url;
+
+  // Verifica like
+  let likedTopico = false;
+  if(usuarioAtual){
+    const { data: likeData } = await sb.from('bb_likes').select('id').eq('topico_id', id).eq('usuario_id', usuarioAtual.id).maybeSingle();
+    likedTopico = !!likeData;
+  }
+  const { count: totalLikes } = await sb.from('bb_likes').select('*', {count:'exact',head:true}).eq('topico_id', id);
+  const isAdmin = usuarioAtual?.email === ADMIN_EMAIL;
+
+  document.getElementById('topicoConteudo').innerHTML = `
+    <div class="tv-cat-badge cat-${catSlug}">${t.categoria || 'Geral'}</div>
+    <h1 class="tv-titulo">${t.titulo}</h1>
+    ${t.subtitulo ? `<p style="font-size:15px;color:var(--txt3);margin-bottom:16px">${t.subtitulo}</p>` : ''}
+    <div class="tv-meta">
+      <div class="tv-autor-info">
+        <div class="tv-avatar">
+          ${avatarAutor ? `<img src="${avatarAutor}"/>` : getIniciais(nomeAutor)}
+        </div>
+        <div class="tv-autor-nome">${nomeAutor}</div>
+      </div>
+      <div class="tv-data">${new Date(t.criado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+    </div>
+    ${t.capa_url ? `<img class="tv-capa" src="${t.capa_url}"/>` : ''}
+    <div class="tv-conteudo">${t.conteudo || ''}</div>
+    <div class="tv-actions">
+      <button class="btn-like ${likedTopico?'liked':''}" id="btnLikeTopico" onclick="toggleLikeTopico('${id}')">
+        ❤️ <span id="likeCount">${totalLikes||0}</span> curtidas
+      </button>
+      ${isAdmin || usuarioAtual?.id === t.usuario_id ? `<button class="btn-del-topico" onclick="deletarTopico('${id}')">🗑️ Deletar tópico</button>` : ''}
+    </div>
+  `;
+
+  await renderComentarios(id);
+}
+
+function voltarLista(){
+  document.getElementById('viewLista').style.display = 'block';
+  document.getElementById('viewTopico').classList.remove('open');
+  document.getElementById('viewTopico').querySelector('div').innerHTML = '';
+  topicoAbertoId = null;
+  window.scrollTo(0,0);
+}
+
+// ── LIKES TÓPICO ──
+async function toggleLikeTopico(id){
+  if(!usuarioAtual){ document.getElementById('authOverlay').classList.add('open'); return; }
+  const btn = document.getElementById('btnLikeTopico');
+  const countEl = document.getElementById('likeCount');
+  const { data: existing } = await sb.from('bb_likes').select('id').eq('topico_id', id).eq('usuario_id', usuarioAtual.id).maybeSingle();
+  if(existing){
+    await sb.from('bb_likes').delete().eq('id', existing.id);
+    btn.classList.remove('liked');
+    countEl.textContent = parseInt(countEl.textContent) - 1;
+  } else {
+    await sb.from('bb_likes').insert({ topico_id: id, usuario_id: usuarioAtual.id });
+    btn.classList.add('liked');
+    countEl.textContent = parseInt(countEl.textContent) + 1;
+  }
+}
+
+// ── COMENTÁRIOS ──
+async function renderComentarios(topicoId){
+  const area = document.getElementById('comentariosArea');
+  const { data: coms, error } = await sb
+    .from('bb_comentarios')
+    .select('*, bb_perfis(nome, avatar_url)')
+    .eq('topico_id', topicoId)
+    .is('parent_id', null)
+    .order('criado_em', { ascending: true });
+
+  const { data: allReplies } = await sb
+    .from('bb_comentarios')
+    .select('*, bb_perfis(nome, avatar_url)')
+    .eq('topico_id', topicoId)
+    .not('parent_id', 'is', null)
+    .order('criado_em', { ascending: true });
+
+  const isAdmin = usuarioAtual?.email === ADMIN_EMAIL;
+  const lista = coms || [];
+  const replies = allReplies || [];
+
+  const formHTML = usuarioAtual ? `
+    <div class="com-form">
+      <div class="com-form-avatar">
+        ${usuarioAtual.avatar_url ? `<img src="${usuarioAtual.avatar_url}"/>` : getIniciais(usuarioAtual.nome)}
+      </div>
+      <div class="com-input-wrap">
+        <textarea class="com-textarea" id="comTexto" placeholder="Escreva um comentário..." rows="3"></textarea>
+        <div class="com-form-footer">
+          <span class="com-hint">CTRL+ENTER PARA ENVIAR</span>
+          <button class="btn-comentar" onclick="enviarComentario()">✈️ Comentar</button>
+        </div>
+      </div>
+    </div>
+  ` : `<div class="com-nao-logado">Faça <a onclick="document.getElementById('authOverlay').classList.add('open')">login</a> para comentar.</div>`;
+
+  const comsHTML = lista.length === 0 ? `<p style="color:var(--txt3);font-size:13px;padding:20px 0">Seja o primeiro a compartilhar sua opinião.</p>` :
+    lista.map(c => {
+      const reps = replies.filter(r => r.parent_id === c.id);
+      const canDel = isAdmin || (usuarioAtual?.id === c.usuario_id);
+      return `<div class="comentario" id="com-${c.id}">
+        <div class="com-header">
+          <div class="com-avatar">
+            ${c.bb_perfis?.avatar_url ? `<img src="${c.bb_perfis.avatar_url}"/>` : getIniciais(c.bb_perfis?.nome||'?')}
+          </div>
+          <span class="com-autor">${c.bb_perfis?.nome||'Anônimo'}</span>
+          <span class="com-data">${timeAgo(c.criado_em)}</span>
+        </div>
+        <div class="com-texto">${c.conteudo}</div>
+        <div class="com-acoes">
+          <button class="btn-like-com" onclick="toggleLikeCom(this,'${c.id}')">❤️ ${c.likes||0}</button>
+          ${usuarioAtual ? `<button class="btn-reply" onclick="toggleReplyForm('${c.id}')">↩️ Responder</button>` : ''}
+          ${canDel ? `<button class="btn-del-com" onclick="deletarComentario('${c.id}')">🗑️</button>` : ''}
+        </div>
+        ${reps.length ? `<div class="replies">${reps.map(r => {
+          const canDelR = isAdmin || (usuarioAtual?.id === r.usuario_id);
+          return `<div class="reply" id="com-${r.id}">
+            <div class="com-header">
+              <div class="com-avatar" style="width:24px;height:24px;font-size:9px">
+                ${r.bb_perfis?.avatar_url ? `<img src="${r.bb_perfis.avatar_url}"/>` : getIniciais(r.bb_perfis?.nome||'?')}
+              </div>
+              <span class="com-autor" style="font-size:12px">${r.bb_perfis?.nome||'Anônimo'}</span>
+              <span class="com-data">${timeAgo(r.criado_em)}</span>
+            </div>
+            <div class="com-texto" style="padding-left:32px;font-size:13px">${r.conteudo}</div>
+            ${canDelR ? `<div class="com-acoes" style="padding-left:32px"><button class="btn-del-com" onclick="deletarComentario('${r.id}')">🗑️</button></div>` : ''}
+          </div>`;
+        }).join('')}</div>` : ''}
+        <div id="reply-form-${c.id}" style="display:none" class="reply-form">
+          <textarea id="reply-text-${c.id}" placeholder="Responder para ${c.bb_perfis?.nome||'Anônimo'}..."></textarea>
+          <div class="reply-form-footer">
+            <button class="btn-reply-cancel" onclick="toggleReplyForm('${c.id}')">Cancelar</button>
+            <button class="btn-reply-send" onclick="enviarReply('${c.id}')">Responder</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+  area.innerHTML = `
+    <div class="comentarios-section">
+      <div class="com-title">COMENTÁRIOS</div>
+      <div class="com-count">${lista.length} comentário${lista.length!==1?'s':''}</div>
+      ${formHTML}
+      <div class="com-list">${comsHTML}</div>
+    </div>
+  `;
+
+  // CTRL+ENTER para enviar
+  const ta = document.getElementById('comTexto');
+  if(ta) ta.addEventListener('keydown', e => { if(e.ctrlKey && e.key==='Enter') enviarComentario(); });
+}
+
+async function enviarComentario(){
+  if(!usuarioAtual){ document.getElementById('authOverlay').classList.add('open'); return; }
+  const ta = document.getElementById('comTexto');
+  const texto = ta.value.trim();
+  if(!texto) return;
+  const { error } = await sb.from('bb_comentarios').insert({
+    topico_id: topicoAbertoId,
+    usuario_id: usuarioAtual.id,
+    conteudo: texto,
+    parent_id: null,
+    likes: 0
+  });
+  if(error){ toast('❌ Erro ao comentar.'); return; }
+  toast('✅ Comentário publicado!');
+  await renderComentarios(topicoAbertoId);
+}
+
+function toggleReplyForm(comId){
+  const form = document.getElementById(`reply-form-${comId}`);
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function enviarReply(parentId){
+  if(!usuarioAtual) return;
+  const ta = document.getElementById(`reply-text-${parentId}`);
+  const texto = ta.value.trim();
+  if(!texto) return;
+  const { error } = await sb.from('bb_comentarios').insert({
+    topico_id: topicoAbertoId,
+    usuario_id: usuarioAtual.id,
+    conteudo: texto,
+    parent_id: parentId,
+    likes: 0
+  });
+  if(error){ toast('❌ Erro ao responder.'); return; }
+  toast('✅ Resposta publicada!');
+  await renderComentarios(topicoAbertoId);
+}
+
+async function toggleLikeCom(btn, comId){
+  if(!usuarioAtual){ document.getElementById('authOverlay').classList.add('open'); return; }
+  const { data: com } = await sb.from('bb_comentarios').select('likes, liked_by').eq('id', comId).single();
+  const liked_by = com.liked_by || [];
+  const jaLikei = liked_by.includes(usuarioAtual.id);
+  const novos = jaLikei ? liked_by.filter(x=>x!==usuarioAtual.id) : [...liked_by, usuarioAtual.id];
+  await sb.from('bb_comentarios').update({ likes: novos.length, liked_by: novos }).eq('id', comId);
+  btn.classList.toggle('liked', !jaLikei);
+  btn.textContent = `❤️ ${novos.length}`;
+}
+
+async function deletarComentario(comId){
+  if(!confirm('Deletar este comentário?')) return;
+  const { error } = await sb.from('bb_comentarios').delete().eq('id', comId);
+  if(!error){ toast('🗑️ Comentário removido.'); await renderComentarios(topicoAbertoId); }
+}
+
+async function deletarTopico(id){
+  if(!confirm('Deletar este tópico e todos os comentários?')) return;
+  await sb.from('bb_comentarios').delete().eq('topico_id', id);
+  await sb.from('bb_likes').delete().eq('topico_id', id);
+  const { error } = await sb.from('bb_topicos').delete().eq('id', id);
+  if(!error){ toast('🗑️ Tópico removido.'); voltarLista(); await carregarTopicos(); }
+}
+
+// ── CRIAR TÓPICO ──
+let catSelecionada = null;
+
+function abrirCriar(){
+  if(!usuarioAtual){ document.getElementById('authOverlay').classList.add('open'); return; }
+  document.getElementById('criarOverlay').classList.add('open');
+}
+
+function fecharCriar(){
+  document.getElementById('criarOverlay').classList.remove('open');
+  // Reset
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('on'));
+  catSelecionada = null;
+  document.getElementById('topicoTitulo').value = '';
+  document.getElementById('topicoSubtitulo').value = '';
+  document.getElementById('editorArea').innerHTML = '';
+  document.getElementById('capaPreview').style.display = 'none';
+  document.getElementById('capaUploadTxt').style.display = 'block';
+  capaBase64 = null;
+  document.getElementById('capaInput').value = '';
+}
+
+function selecionarCat(btn){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  catSelecionada = btn.dataset.cat;
+}
+
+function formatText(cmd){
+  if(cmd === 'h2'){
+    document.execCommand('formatBlock', false, 'h2');
+  } else {
+    document.execCommand(cmd, false, null);
+  }
+  document.getElementById('editorArea').focus();
+}
+
+function inserirLink(){
+  const url = prompt('URL do link:');
+  if(url) document.execCommand('createLink', false, url);
+}
+
+function previewCapa(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    capaBase64 = e.target.result;
+    const prev = document.getElementById('capaPreview');
+    prev.src = capaBase64;
+    prev.style.display = 'block';
+    document.getElementById('capaUploadTxt').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function publicarTopico(){
+  const titulo = document.getElementById('topicoTitulo').value.trim();
+  const subtitulo = document.getElementById('topicoSubtitulo').value.trim();
+  const conteudo = document.getElementById('editorArea').innerHTML.trim();
+  const btn = document.getElementById('btnPublicar');
+
+  if(!catSelecionada){ toast('⚠️ Escolha uma categoria!'); return; }
+  if(!titulo){ toast('⚠️ Digite um título!'); return; }
+  if(!conteudo || conteudo === ''){ toast('⚠️ Escreva o conteúdo!'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Publicando...';
+
+  let capa_url = null;
+
+  // Upload da capa para o Supabase Storage
+  if(capaBase64 && capaBase64.startsWith('data:')){
+    try {
+      const blob = await (await fetch(capaBase64)).blob();
+      const ext = blob.type.split('/')[1] || 'jpg';
+      const filename = `capa_${Date.now()}.${ext}`;
+      const { data: upData, error: upErr } = await sb.storage
+        .from('bb-capas')
+        .upload(filename, blob, { contentType: blob.type, upsert: false });
+      if(!upErr){
+        const { data: { publicUrl } } = sb.storage.from('bb-capas').getPublicUrl(filename);
+        capa_url = publicUrl;
+      }
+    } catch(e){ console.warn('Upload da capa falhou:', e); }
+  }
+
+  const { error } = await sb.from('bb_topicos').insert({
+    usuario_id: usuarioAtual.id,
+    categoria: catSelecionada,
+    titulo,
+    subtitulo: subtitulo || null,
+    conteudo,
+    capa_url
+  });
+
+  btn.disabled = false;
+  btn.textContent = '🚀 PUBLICAR';
+
+  if(error){ toast('❌ Erro ao publicar: ' + error.message); return; }
+  toast('🎉 Tópico publicado!');
+  fecharCriar();
+  await carregarTopicos();
+}
+
+// ── INIT ──
+async function init(){
+  await initAuth();
+  await carregarTopicos();
+}
+init();
+</script>
+</body>
+</html>
