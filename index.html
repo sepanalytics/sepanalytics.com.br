@@ -966,7 +966,7 @@
 
 <!-- AD PLACEHOLDER -->
 <div class="px-4 sm:px-6 md:px-8 pt-6 pb-6 md:pt-12 md:pb-0">
-  <div class="relative overflow-hidden rounded-lg bg-gradient-to-br from-card/50 via-card/30 to-transparent border border-border/30 backdrop-blur-sm min-h-[56px] md:min-h-[90px] w-full mx-auto max-w-7xl">
+  <div class="relative overflow-hidden rounded-lg bg-gradient-to-br from-card/50 via-card/30 to-transparent border border-border/30 backdrop-blur-sm min-h-[56px] md:min-h-[90px] w-full mx-auto max-w-7xl" id="adSlotTopo">
     <div class="absolute top-0 left-0 w-16 h-16 bg-gradient-to-br from-border/20 to-transparent rounded-tl-lg"></div>
     <div class="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-border/20 to-transparent rounded-br-lg"></div>
     <div class="relative w-full h-full flex items-center justify-center p-2 min-h-[56px] md:min-h-[90px]">
@@ -988,12 +988,12 @@
     </div>
     <div class="grid lg:grid-cols-3 gap-6">
       <div class="rounded-xl shadow lg:col-span-2 overflow-hidden border-0 bg-black/40 backdrop-blur-sm card-hover">
-        <div class="relative w-full aspect-video group ph-6 flex items-center justify-center" id="liveVideoWrap">
-          <div class="flex flex-col items-center gap-3 text-muted-foreground">
-            <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-              <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" class="w-7 h-7 ml-1" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"></path></svg>
-            </div>
-            <span class="text-sm">Live em breve — cole aqui o link do YouTube</span>
+        <div class="relative w-full aspect-video group ph-6 flex items-center justify-center overflow-hidden" id="liveVideoWrap">
+          <img src="https://yt3.googleusercontent.com/KjEOkFRTzqMYwu2kgoknxdH_Chve1LUjPq5f2Oc7Hmllqm-CPNjzZwfQ8ZPq6G5M6wC1sqj1ZN4=s900-c-k-c0x00ffffff-no-rj" alt="" class="absolute inset-0 w-full h-full object-cover blur-md scale-110 opacity-40"/>
+          <div class="absolute inset-0 bg-black/40"></div>
+          <div class="relative flex flex-col items-center gap-3 text-white">
+            <img src="https://yt3.googleusercontent.com/KjEOkFRTzqMYwu2kgoknxdH_Chve1LUjPq5f2Oc7Hmllqm-CPNjzZwfQ8ZPq6G5M6wC1sqj1ZN4=s900-c-k-c0x00ffffff-no-rj" alt="SEP Analytics no Youtube" class="w-16 h-16 rounded-full border-2 border-white/70 shadow-lg object-cover"/>
+            <span class="text-sm font-medium">Live em breve — cole aqui o link do YouTube</span>
           </div>
         </div>
       </div>
@@ -1001,10 +1001,10 @@
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
             <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Ao vivo todos os dias - Siga nosso canal no Youtube</span>
+            <span>Em breve no canal</span>
           </div>
-          <h3 class="font-display text-2xl md:text-3xl mb-3" id="liveTitle">Acompanhe as Lives - Conteúdo Informativo</h3>
-          <p class="text-muted-foreground leading-relaxed" id="liveDesc">Todos os dias tem live no canal - Conteúdos informativos, conteúdo tático sobre o Palmeiras direto no nosso canal do Youtube.</p>
+          <h3 class="font-display text-2xl md:text-3xl mb-3" id="liveTitle">Em breve: vídeos e lives informativas</h3>
+          <p class="text-muted-foreground leading-relaxed" id="liveDesc">Em breve teremos vídeos informativos e lives sobre o Palmeiras no nosso canal do Youtube. Se inscreve pra não perder nada.</p>
         </div>
         <a target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 mt-6 px-5 py-3 rounded-lg bg-foreground text-background font-semibold hover:opacity-90 transition-opacity w-fit" href="https://www.youtube.com/@sepanalytics" id="liveBtn">
           <span>Inscreva-se no Canal</span>
@@ -1033,7 +1033,7 @@
 
   <!-- AD 2 -->
   <div class="py-6 md:py-10 flex justify-center">
-    <div class="relative overflow-hidden rounded-lg bg-gradient-to-br from-card/50 via-card/30 to-transparent border border-border/30 backdrop-blur-sm min-h-[56px] md:min-h-[90px] w-full max-w-7xl flex items-center justify-center">
+    <div class="relative overflow-hidden rounded-lg bg-gradient-to-br from-card/50 via-card/30 to-transparent border border-border/30 backdrop-blur-sm min-h-[56px] md:min-h-[90px] w-full max-w-7xl flex items-center justify-center" id="adSlotMeio">
       <span class="text-xs text-muted-foreground/60 font-medium">Espaço publicitário</span>
       <span class="absolute top-2 right-2 px-1.5 py-0.5 text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium">Ad</span>
     </div>
@@ -1722,6 +1722,26 @@
       </div>
       <button class="btn-auth" style="width:auto;padding:10px 20px;margin-top:8px" onclick="edAdicionar()">+ Adicionar aos destaques</button>
       <div class="admin-list mt-4" id="admEmAltaList"></div>
+
+      <div class="text-xs text-muted-foreground mb-2 mt-8">Espaço publicitário — Topo da Home</div>
+      <div class="admin-form-grid">
+        <label class="btn-auth-secondary" style="grid-column:1/-1;text-align:center">Enviar imagem<input type="file" accept="image/*" id="adTopoUpload" style="display:none" onchange="admUploadAd(this,1)"/></label>
+        <span class="text-xs text-muted-foreground" id="adTopoStatus" style="grid-column:1/-1"></span>
+        <input type="hidden" id="adTopoImagemUrl"/>
+        <input class="auth-inp" type="text" id="adTopoLink" placeholder="Link ao clicar no anúncio" style="grid-column:1/-1"/>
+        <label class="text-xs" style="grid-column:1/-1;display:flex;align-items:center;gap:6px;color:hsl(var(--muted-foreground))"><input type="checkbox" id="adTopoAtivo"/> Anúncio ativo</label>
+      </div>
+      <button class="btn-auth" style="width:auto;padding:10px 20px;margin-top:8px" onclick="admSalvarAd(1)">Salvar anúncio do topo</button>
+
+      <div class="text-xs text-muted-foreground mb-2 mt-8">Espaço publicitário — Meio da Home</div>
+      <div class="admin-form-grid">
+        <label class="btn-auth-secondary" style="grid-column:1/-1;text-align:center">Enviar imagem<input type="file" accept="image/*" id="adMeioUpload" style="display:none" onchange="admUploadAd(this,2)"/></label>
+        <span class="text-xs text-muted-foreground" id="adMeioStatus" style="grid-column:1/-1"></span>
+        <input type="hidden" id="adMeioImagemUrl"/>
+        <input class="auth-inp" type="text" id="adMeioLink" placeholder="Link ao clicar no anúncio" style="grid-column:1/-1"/>
+        <label class="text-xs" style="grid-column:1/-1;display:flex;align-items:center;gap:6px;color:hsl(var(--muted-foreground))"><input type="checkbox" id="adMeioAtivo"/> Anúncio ativo</label>
+      </div>
+      <button class="btn-auth" style="width:auto;padding:10px 20px;margin-top:8px" onclick="admSalvarAd(2)">Salvar anúncio do meio</button>
     </div>
 
     <div class="admin-tab-panel hidden" id="adm-tab-config">
@@ -2077,6 +2097,21 @@
       if (data.canal_texto_desc) document.getElementById('liveDesc').textContent = data.canal_texto_desc;
       if (data.canal_link) document.getElementById('liveBtn').href = data.canal_link;
     } catch (e) { console.error('iniCarregarLive', e); }
+  }
+
+  // ---- Espaços publicitários da Home ----
+  async function iniCarregarAds() {
+    try {
+      const { data, error } = await sb.from('home_ads').select('*');
+      if (error || !data) return; // tabela ainda não existe ou vazia: mantém o placeholder
+      const slots = { 1: 'adSlotTopo', 2: 'adSlotMeio' };
+      data.forEach(ad => {
+        if (!ad.ativo || !ad.imagem_url) return;
+        const el = document.getElementById(slots[ad.id]);
+        if (!el) return;
+        el.innerHTML = `<a href="${escapeHtml(ad.link_url || '#')}" target="_blank" rel="noreferrer" class="block w-full"><img src="${escapeHtml(ad.imagem_url)}" alt="Anúncio" class="w-full h-auto block rounded-lg"/></a>`;
+      });
+    } catch (e) { console.error('iniCarregarAds', e); }
   }
 
   // ---- Últimas Colunas (home_posts, preview na Home) ----
@@ -2541,6 +2576,7 @@
     admPopularPartidasJogadorForm();
     admCarregarEmAltaList();
     edAtualizarSelectItem();
+    admCarregarAdsForm();
   }
   function closeAdmin() { document.getElementById('admOverlay').classList.remove('open'); }
   function admShowTab(tab) {
@@ -2676,6 +2712,49 @@
     document.getElementById('jgTitular').value = 'false';
     document.getElementById('jgBtnSalvar').textContent = '+ Adicionar jogador';
     document.getElementById('jgBtnCancelar').style.display = 'none';
+  }
+  async function admCarregarAdsForm() {
+    try {
+      const { data, error } = await sb.from('home_ads').select('*');
+      if (error || !data) return;
+      const map = { 1: 'Topo', 2: 'Meio' };
+      data.forEach(ad => {
+        const suf = map[ad.id];
+        if (!suf) return;
+        document.getElementById(`ad${suf}ImagemUrl`).value = ad.imagem_url || '';
+        document.getElementById(`ad${suf}Link`).value = ad.link_url || '';
+        document.getElementById(`ad${suf}Ativo`).checked = !!ad.ativo;
+        document.getElementById(`ad${suf}Status`).textContent = ad.imagem_url ? 'Imagem atual salva.' : '';
+      });
+    } catch (e) { console.error('admCarregarAdsForm', e); }
+  }
+  async function admUploadAd(input, id) {
+    const file = input.files?.[0];
+    if (!file) return;
+    const suf = id === 1 ? 'Topo' : 'Meio';
+    const status = document.getElementById(`ad${suf}Status`);
+    status.textContent = 'Enviando...';
+    const ext = file.name.split('.').pop();
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await sb.storage.from('home-ads').upload(path, file, { upsert: true });
+    if (error) { status.textContent = 'Erro ao enviar: ' + error.message + ' — confirma se rodou o SQL do bucket home-ads.'; input.value = ''; return; }
+    const { data } = sb.storage.from('home-ads').getPublicUrl(path);
+    document.getElementById(`ad${suf}ImagemUrl`).value = data.publicUrl;
+    status.textContent = 'Imagem enviada! Clique em Salvar pra confirmar.';
+    input.value = '';
+  }
+  async function admSalvarAd(id) {
+    const suf = id === 1 ? 'Topo' : 'Meio';
+    const payload = {
+      id,
+      imagem_url: document.getElementById(`ad${suf}ImagemUrl`).value || null,
+      link_url: document.getElementById(`ad${suf}Link`).value.trim() || null,
+      ativo: document.getElementById(`ad${suf}Ativo`).checked,
+    };
+    const { error } = await sb.from('home_ads').upsert(payload).select('id');
+    if (error) { alert('Erro ao salvar anúncio: ' + error.message + ' — confirma se rodou o SQL da tabela home_ads.'); return; }
+    document.getElementById(`ad${suf}Status`).textContent = 'Anúncio salvo!';
+    iniCarregarAds();
   }
   async function admUploadFotoJogador(input) {
     const file = input.files?.[0];
@@ -5427,6 +5506,7 @@
   // ---- Carrega dados reais da Home ----
   iniCarregarLive();
   iniCarregarEmAlta();
+  iniCarregarAds();
 </script>
 </body>
 </html>
