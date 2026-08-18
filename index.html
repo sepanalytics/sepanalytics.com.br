@@ -4446,6 +4446,8 @@
     btn.innerHTML = '⏳ Aguarde...'; btn.disabled = true;
     const imgs = Array.from(field.querySelectorAll('img'));
     const origSrcs = imgs.map(img => img.src);
+    const nameEls = [...field.querySelectorAll('.fp-name, .fp-rating')];
+    const origLS = nameEls.map(n => n.style.letterSpacing);
     try {
       await loadHtml2Canvas();
       const toHide = field.querySelectorAll('.fp-remove, .fp-stats-btn, .fp-num');
@@ -4455,6 +4457,10 @@
         if (b64) img.src = b64; else img.style.setProperty('display', 'none', 'important');
       }));
       await document.fonts.ready;
+      // html2canvas mede/renderiza texto com letter-spacing de forma imprecisa,
+      // deslocando o texto do centro da pill só na exportação (bug conhecido da lib) —
+      // zera o letter-spacing só durante a captura pra evitar esse desvio
+      nameEls.forEach(n => n.style.letterSpacing = '0px');
       await new Promise(r => setTimeout(r, 300));
       const canvas = await comTimeout(html2canvas(field, { backgroundColor: '#0d2e12', scale: 2, useCORS: false, allowTaint: true, logging: false, imageTimeout: 8000, windowWidth: document.documentElement.clientWidth, windowHeight: document.documentElement.clientHeight }), 20000, 'A geração da imagem demorou demais. Tente novamente.');
       const link = document.createElement('a');
@@ -4466,6 +4472,7 @@
       console.error('baixarCampoEscalacao', e);
     } finally {
       imgs.forEach((img, i) => { img.style.removeProperty('display'); img.src = origSrcs[i]; });
+      nameEls.forEach((n, i) => n.style.letterSpacing = origLS[i]);
       field.querySelectorAll('.fp-remove, .fp-stats-btn, .fp-num').forEach(el => el.style.removeProperty('display'));
       btn.innerHTML = origLabel; btn.disabled = false;
     }
@@ -4960,6 +4967,8 @@
     if (btn) { btn.innerHTML = '⏳ Aguarde...'; btn.disabled = true; }
     const imgs = Array.from(field.querySelectorAll('img'));
     const origSrcs = imgs.map(img => img.src);
+    const nameEls = [...field.querySelectorAll('.fp-name, .fp-rating')];
+    const origLS = nameEls.map(n => n.style.letterSpacing);
     try {
       await loadHtml2Canvas();
       await Promise.all(imgs.map(async img => {
@@ -4967,6 +4976,10 @@
         if (b64) img.src = b64; else img.style.setProperty('display', 'none', 'important');
       }));
       await document.fonts.ready;
+      // html2canvas mede/renderiza texto com letter-spacing de forma imprecisa,
+      // deslocando o texto do centro da pill só na exportação (bug conhecido da lib) —
+      // zera o letter-spacing só durante a captura pra evitar esse desvio
+      nameEls.forEach(n => n.style.letterSpacing = '0px');
       await new Promise(r => setTimeout(r, 300));
       const canvas = await comTimeout(html2canvas(field, { backgroundColor: '#0a2810', scale: 2, useCORS: false, allowTaint: true, logging: false, imageTimeout: 8000, windowWidth: document.documentElement.clientWidth, windowHeight: document.documentElement.clientHeight }), 20000, 'A geração do card demorou demais. Tente novamente.');
       const link = document.createElement('a');
@@ -4976,6 +4989,7 @@
     } catch (e) { alert('Erro ao gerar card.'); console.error('gerarCard', e); }
     finally {
       imgs.forEach((img, i) => { img.style.removeProperty('display'); img.src = origSrcs[i]; });
+      nameEls.forEach((n, i) => n.style.letterSpacing = origLS[i]);
       if (btn) { btn.innerHTML = origLabel; btn.disabled = false; }
     }
   }
