@@ -4412,6 +4412,34 @@
     renderEscElencoList();
   }
 
+  // O html2canvas não mede a fonte Bebas Neue (nem Inter, em menor grau) com precisão,
+  // deixando o texto nascer deslocado dentro da própria pill só na exportação (bug
+  // conhecido da lib com fontes customizadas). Pré-renderiza cada pill de nome/nota como
+  // imagem usando o canvas nativo do navegador (que mede a fonte certo) antes de capturar,
+  // e devolve uma função pra restaurar o texto original depois.
+  function prepararPillsParaExport(container) {
+    const els = [...container.querySelectorAll('.fp-name, .fp-rating')];
+    const origHTML = els.map(el => el.innerHTML);
+    els.forEach(el => {
+      const cs = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const SCALE = 4;
+      const c = document.createElement('canvas');
+      c.width = Math.ceil(rect.width * SCALE);
+      c.height = Math.ceil(rect.height * SCALE);
+      const ctx = c.getContext('2d');
+      ctx.scale(SCALE, SCALE);
+      ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      ctx.fillStyle = cs.color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(el.textContent, rect.width / 2, rect.height / 2 + 1);
+      el.innerHTML = `<img src="${c.toDataURL('image/png')}" style="width:100%;height:100%;display:block;">`;
+    });
+    return () => els.forEach((el, i) => { el.innerHTML = origHTML[i]; });
+  }
+
   const _imgB64Cache = {};
   async function imgParaBase64(url) {
     if (!url || url.startsWith('data:')) return null;
@@ -4446,8 +4474,7 @@
     btn.innerHTML = '⏳ Aguarde...'; btn.disabled = true;
     const imgs = Array.from(field.querySelectorAll('img'));
     const origSrcs = imgs.map(img => img.src);
-    const nameEls = [...field.querySelectorAll('.fp-name, .fp-rating')];
-    const origLS = nameEls.map(n => n.style.letterSpacing);
+    let restaurarPills = null;
     try {
       await loadHtml2Canvas();
       const toHide = field.querySelectorAll('.fp-remove, .fp-stats-btn, .fp-num');
@@ -4457,10 +4484,7 @@
         if (b64) img.src = b64; else img.style.setProperty('display', 'none', 'important');
       }));
       await document.fonts.ready;
-      // html2canvas mede/renderiza texto com letter-spacing de forma imprecisa,
-      // deslocando o texto do centro da pill só na exportação (bug conhecido da lib) —
-      // zera o letter-spacing só durante a captura pra evitar esse desvio
-      nameEls.forEach(n => n.style.letterSpacing = '0px');
+      restaurarPills = prepararPillsParaExport(field);
       await new Promise(r => setTimeout(r, 300));
       const canvas = await comTimeout(html2canvas(field, { backgroundColor: '#0d2e12', scale: 2, useCORS: false, allowTaint: true, logging: false, imageTimeout: 8000, windowWidth: document.documentElement.clientWidth, windowHeight: document.documentElement.clientHeight }), 20000, 'A geração da imagem demorou demais. Tente novamente.');
       const link = document.createElement('a');
@@ -4472,7 +4496,7 @@
       console.error('baixarCampoEscalacao', e);
     } finally {
       imgs.forEach((img, i) => { img.style.removeProperty('display'); img.src = origSrcs[i]; });
-      nameEls.forEach((n, i) => n.style.letterSpacing = origLS[i]);
+      if (restaurarPills) restaurarPills();
       field.querySelectorAll('.fp-remove, .fp-stats-btn, .fp-num').forEach(el => el.style.removeProperty('display'));
       btn.innerHTML = origLabel; btn.disabled = false;
     }
@@ -4967,8 +4991,7 @@
     if (btn) { btn.innerHTML = '⏳ Aguarde...'; btn.disabled = true; }
     const imgs = Array.from(field.querySelectorAll('img'));
     const origSrcs = imgs.map(img => img.src);
-    const nameEls = [...field.querySelectorAll('.fp-name, .fp-rating')];
-    const origLS = nameEls.map(n => n.style.letterSpacing);
+    let restaurarPills = null;
     try {
       await loadHtml2Canvas();
       await Promise.all(imgs.map(async img => {
@@ -4976,10 +4999,7 @@
         if (b64) img.src = b64; else img.style.setProperty('display', 'none', 'important');
       }));
       await document.fonts.ready;
-      // html2canvas mede/renderiza texto com letter-spacing de forma imprecisa,
-      // deslocando o texto do centro da pill só na exportação (bug conhecido da lib) —
-      // zera o letter-spacing só durante a captura pra evitar esse desvio
-      nameEls.forEach(n => n.style.letterSpacing = '0px');
+      restaurarPills = prepararPillsParaExport(field);
       await new Promise(r => setTimeout(r, 300));
       const canvas = await comTimeout(html2canvas(field, { backgroundColor: '#0a2810', scale: 2, useCORS: false, allowTaint: true, logging: false, imageTimeout: 8000, windowWidth: document.documentElement.clientWidth, windowHeight: document.documentElement.clientHeight }), 20000, 'A geração do card demorou demais. Tente novamente.');
       const link = document.createElement('a');
@@ -4989,7 +5009,7 @@
     } catch (e) { alert('Erro ao gerar card.'); console.error('gerarCard', e); }
     finally {
       imgs.forEach((img, i) => { img.style.removeProperty('display'); img.src = origSrcs[i]; });
-      nameEls.forEach((n, i) => n.style.letterSpacing = origLS[i]);
+      if (restaurarPills) restaurarPills();
       if (btn) { btn.innerHTML = origLabel; btn.disabled = false; }
     }
   }
