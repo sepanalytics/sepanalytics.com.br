@@ -1592,25 +1592,34 @@
   <div class="login2-card">
     <img class="login2-badge" src="images/sep-logo-square.png" alt="SEP Analytics"/>
     <div class="login2-title" id="login2Title">ENTRE NO SITE!</div>
-    <label class="login2-label">Email</label>
-    <input class="login2-inp" type="email" id="authEmail" placeholder="Exemplo@email.com" autocomplete="email"/>
-    <label class="login2-label">Senha</label>
-    <input class="login2-inp" type="password" id="authPassword" placeholder="Ao menos 6 caracteres" autocomplete="current-password"/>
-    <div class="login2-nome" id="authNomeWrap">
-      <label class="login2-label">Apelido</label>
-      <input class="login2-inp" type="text" id="authNome" placeholder="Seu apelido (ex: FielTorcedor10)"/>
+    <div id="authNormalWrap">
+      <label class="login2-label">Email</label>
+      <input class="login2-inp" type="email" id="authEmail" placeholder="Exemplo@email.com" autocomplete="email"/>
+      <label class="login2-label">Senha</label>
+      <input class="login2-inp" type="password" id="authPassword" placeholder="Ao menos 6 caracteres" autocomplete="current-password"/>
+      <div class="login2-nome" id="authNomeWrap">
+        <label class="login2-label">Apelido</label>
+        <input class="login2-inp" type="text" id="authNome" placeholder="Seu apelido (ex: FielTorcedor10)"/>
+      </div>
+      <button class="login2-submit" id="authBtn" onclick="authDoAuth()">ENTRAR</button>
+      <div class="login2-row">
+        <span></span>
+        <span class="login2-ou">OU</span>
+        <a class="login2-forgot" id="login2Forgot" onclick="authForgotPassword();return false;">Esqueci minha Senha</a>
+      </div>
+      <button class="login2-google" onclick="authLoginGoogle()">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47c-.28 1.5-1.13 2.78-2.4 3.63v3.02h3.88c2.27-2.09 3.57-5.17 3.57-8.84z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.95-2.9l-3.88-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.26v3.11C3.24 21.3 7.28 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.26a12 12 0 0 0 0 10.76z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.35.6 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.28 0 3.24 2.7 1.26 6.62l4.01 3.11C6.22 6.87 8.87 4.75 12 4.75z"/></svg>
+        <span>Continuar com Google</span>
+      </button>
+      <div class="login2-switch" id="login2Switch">Ainda não tem uma conta? <a onclick="authSwitchTab('cadastro');return false;">Criar conta</a></div>
     </div>
-    <button class="login2-submit" id="authBtn" onclick="authDoAuth()">ENTRAR</button>
-    <div class="login2-row">
-      <span></span>
-      <span class="login2-ou">OU</span>
-      <a class="login2-forgot" id="login2Forgot" onclick="authForgotPassword();return false;">Esqueci minha Senha</a>
+    <div id="authResetWrap" class="hidden">
+      <label class="login2-label">Nova senha</label>
+      <input class="login2-inp" type="password" id="authNewPassword" placeholder="Ao menos 6 caracteres" autocomplete="new-password"/>
+      <label class="login2-label">Confirme a nova senha</label>
+      <input class="login2-inp" type="password" id="authNewPasswordConfirm" placeholder="Repita a senha" autocomplete="new-password"/>
+      <button class="login2-submit" id="authResetBtn" onclick="authDefinirNovaSenha()">SALVAR NOVA SENHA</button>
     </div>
-    <button class="login2-google" onclick="authLoginGoogle()">
-      <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47c-.28 1.5-1.13 2.78-2.4 3.63v3.02h3.88c2.27-2.09 3.57-5.17 3.57-8.84z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.95-2.9l-3.88-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.26v3.11C3.24 21.3 7.28 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.26a12 12 0 0 0 0 10.76z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.35.6 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.28 0 3.24 2.7 1.26 6.62l4.01 3.11C6.22 6.87 8.87 4.75 12 4.75z"/></svg>
-      <span>Continuar com Google</span>
-    </button>
-    <div class="login2-switch" id="login2Switch">Ainda não tem uma conta? <a onclick="authSwitchTab('cadastro');return false;">Criar conta</a></div>
     <div class="auth-err" id="authErr"></div>
     <div class="auth-ok" id="authOk"></div>
   </div>
@@ -2435,6 +2444,8 @@
   }
   function authSwitchTab(mode) {
     authMode = mode;
+    document.getElementById('authNormalWrap').classList.remove('hidden');
+    document.getElementById('authResetWrap').classList.add('hidden');
     document.getElementById('login2Title').textContent = mode === 'login' ? 'ENTRE NO SITE!' : 'CRIAR CONTA';
     document.getElementById('authBtn').textContent = mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
     document.getElementById('authPassword').setAttribute('autocomplete', mode === 'login' ? 'current-password' : 'new-password');
@@ -2451,10 +2462,43 @@
     const errEl = document.getElementById('authErr'), okEl = document.getElementById('authOk');
     errEl.textContent = ''; okEl.textContent = '';
     if (!email) { errEl.textContent = 'Digite seu e-mail para recuperar a senha.'; return; }
-    const { error } = await sb.auth.resetPasswordForEmail(email);
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
     if (error) errEl.textContent = error.message;
     else okEl.textContent = 'Enviamos um link de recuperação para o seu e-mail.';
   }
+  function ativarModoResetSenha() {
+    abrirLogin();
+    document.getElementById('authNormalWrap').classList.add('hidden');
+    document.getElementById('authResetWrap').classList.remove('hidden');
+    document.getElementById('login2Title').textContent = 'DEFINIR NOVA SENHA';
+    document.getElementById('authErr').textContent = '';
+    document.getElementById('authOk').textContent = '';
+  }
+  async function authDefinirNovaSenha() {
+    const senha = document.getElementById('authNewPassword').value;
+    const confirmacao = document.getElementById('authNewPasswordConfirm').value;
+    const errEl = document.getElementById('authErr'), okEl = document.getElementById('authOk');
+    errEl.textContent = ''; okEl.textContent = '';
+    if (!senha || senha.length < 6) { errEl.textContent = 'Senha precisa ter pelo menos 6 caracteres.'; return; }
+    if (senha !== confirmacao) { errEl.textContent = 'As senhas não são iguais.'; return; }
+    const btn = document.getElementById('authResetBtn');
+    btn.disabled = true; btn.textContent = 'Salvando...';
+    const { error } = await sb.auth.updateUser({ password: senha });
+    btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA';
+    if (error) { errEl.textContent = error.message; return; }
+    okEl.textContent = 'Senha alterada! Você já está logado(a).';
+    document.getElementById('authNewPassword').value = '';
+    document.getElementById('authNewPasswordConfirm').value = '';
+    setTimeout(() => {
+      document.getElementById('authResetWrap').classList.add('hidden');
+      document.getElementById('authNormalWrap').classList.remove('hidden');
+      document.getElementById('login2Title').textContent = 'ENTRE NO SITE!';
+      fecharLogin();
+    }, 1800);
+  }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') ativarModoResetSenha();
+  });
   function formatarTempoBloqueio(seg) {
     const m = Math.floor(seg / 60), s = seg % 60;
     return m > 0 ? `${m}min ${s}s` : `${s}s`;
