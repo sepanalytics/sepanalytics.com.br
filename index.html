@@ -2289,7 +2289,7 @@
         <time>${fmtDate(p.data_publicacao)}</time>
       </div>
       ${p.imagem_url ? `<img src="${escapeHtml(p.imagem_url)}" class="w-full rounded-xl mb-6 aspect-[16/9] object-cover"/>` : ''}
-      <p class="text-foreground/90 text-lg leading-relaxed mb-8">${escapeHtml(p.resumo || '')}</p>
+      <p class="text-foreground/90 text-lg leading-relaxed mb-8" style="white-space:pre-line">${escapeHtml(p.resumo || '')}</p>
       ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-foreground text-background font-semibold hover:opacity-90 transition-opacity"><span>Ver conteúdo original</span></a>` : ''}
     `;
     window.scrollTo(0, 0);
