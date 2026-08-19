@@ -1440,7 +1440,7 @@
       <div class="flex flex-wrap gap-2 justify-center mt-3" id="resBenchRow"></div>
       <div class="mt-6" id="resCompList"></div>
       <div class="flex gap-2 mt-6">
-        <button class="btn-auth-secondary" style="flex:1" onclick="fecharResultado()">Fechar</button>
+        <button class="btn-auth-secondary" style="flex:1" onclick="fecharResultado()">↺ Avaliar novamente</button>
         <button class="btn-auth" style="flex:2" onclick="gerarCard()">⬇ Baixar card</button>
       </div>
     </div>
@@ -3373,20 +3373,26 @@
     const chave = chaveNotaPorNome(nome);
     if (!chave) return;
     try {
-      const { data } = await sb.from('notas').select('nota,usuario_id').eq('chave', chave);
+      const { data } = await sb.from('notas').select('nota,usuario_id,jogo_id').eq('chave', chave);
       if (data && data.length) {
         const media = data.reduce((a, r) => a + Number(r.nota), 0) / data.length;
+        const partidasAvaliadas = new Set(data.map(r => r.jogo_id)).size;
         document.getElementById(ids.mediaVal).textContent = media.toFixed(1);
         document.getElementById(ids.mediaBadge).textContent = media.toFixed(1);
-        document.getElementById(ids.mediaQtd).textContent = `${data.length} partida${data.length > 1 ? 's' : ''} avaliada${data.length > 1 ? 's' : ''}`;
+        document.getElementById(ids.mediaBadge).style.background = notaCorHex(media);
+        document.getElementById(ids.mediaBadge).style.color = notaTextoContraste(media);
+        document.getElementById(ids.mediaQtd).textContent = `${partidasAvaliadas} partida${partidasAvaliadas > 1 ? 's' : ''} avaliada${partidasAvaliadas > 1 ? 's' : ''}`;
         if (currentUser?.id) {
           const minhas = data.filter(r => r.usuario_id === currentUser.id);
           if (minhas.length) {
             const minhaMedia = minhas.reduce((a, r) => a + Number(r.nota), 0) / minhas.length;
+            const minhasPartidas = new Set(minhas.map(r => r.jogo_id)).size;
             document.getElementById(ids.minhaVal).textContent = minhaMedia.toFixed(1);
             document.getElementById(ids.minhaBadge).textContent = minhaMedia.toFixed(1);
-            document.getElementById(ids.minhaBadge).className = document.getElementById(ids.minhaBadge).className.replace('border border-border/30 bg-muted/30 text-muted-foreground/40', 'bg-yellow-400 text-zinc-900');
-            document.getElementById(ids.minhaQtd).textContent = `${minhas.length} partida${minhas.length > 1 ? 's' : ''} avaliada${minhas.length > 1 ? 's' : ''}`;
+            document.getElementById(ids.minhaBadge).classList.remove('border', 'border-border/30', 'bg-muted/30', 'text-muted-foreground/40');
+            document.getElementById(ids.minhaBadge).style.background = notaCorHex(minhaMedia);
+            document.getElementById(ids.minhaBadge).style.color = notaTextoContraste(minhaMedia);
+            document.getElementById(ids.minhaQtd).textContent = `${minhasPartidas} partida${minhasPartidas > 1 ? 's' : ''} avaliada${minhasPartidas > 1 ? 's' : ''}`;
           }
         }
       }
@@ -4775,6 +4781,8 @@
     }
     renderVrdContent();
     renderVrdDD();
+    const chaves = allChaves();
+    if (chaves.length && chaves.every(c => myVote(c) !== null)) abrirResultado();
   }
 
   function myVote(k) { return notesCache[k]?.meu ?? null; }
