@@ -390,6 +390,14 @@
   .m-tname{ font-family:'Bebas Neue',sans-serif; font-size:14px; font-weight:600; letter-spacing:.5px; }
   .m-score{ font-family:'Bebas Neue',sans-serif; font-size:72px; font-weight:700; line-height:1; letter-spacing:6px; color:#fff; }
   .m-score .sep{ color:#2e2e2e; font-size:54px; }
+  @media (max-width:480px){
+    .m-placar{ gap:14px; }
+    .m-shield{ width:48px; height:48px; margin-bottom:6px; }
+    .m-shield img{ width:34px; height:34px; }
+    .m-tname{ font-size:11px; }
+    .m-score{ font-size:36px; letter-spacing:2px; }
+    .m-score .sep{ font-size:26px; }
+  }
   .m-info{ text-align:center; font-size:11px; color:#888; position:relative; z-index:1; letter-spacing:.3px; }
   .m-info span{ margin:0 6px; }
   .match-avg-bar{ background:#151515; border-top:1px solid rgba(255,255,255,.08); padding:14px 24px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
@@ -485,7 +493,7 @@
   .bb-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
   .topico-card{ background:#111; border:1px solid rgba(255,255,255,.08); border-radius:14px; overflow:hidden; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; }
   .topico-card:hover{ border-color:rgba(46,240,106,.3); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,.4); }
-  .tc-capa{ width:100%; height:170px; object-fit:cover; background:#1a1a1a; display:block; }
+  .tc-capa{ width:100%; height:170px; object-fit:contain; background:#1a1a1a; display:block; }
   .tc-capa-placeholder{ width:100%; height:170px; background:linear-gradient(135deg,#0a1a0a,#1a1a1a); display:flex; align-items:center; justify-content:center; font-size:40px; color:rgba(46,240,106,.15); }
   .tc-body{ padding:18px 18px 14px; flex:1; display:flex; flex-direction:column; }
   .tc-cat{ display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; padding:3px 9px; border-radius:4px; width:fit-content; }
@@ -3703,6 +3711,7 @@
     if (bbCarregandoTopico) return;
     bbCarregandoTopico = true;
     bbTopicoId = id;
+    history.replaceState(null, '', '#topico=' + id);
     document.getElementById('bbViewLista').style.display = 'none';
     document.getElementById('bbViewTopico').style.display = 'block';
     const conteudoEl = document.getElementById('bbTopicoConteudo');
@@ -3738,6 +3747,7 @@
         <div class="tv-conteudo">${bbSanitizeRich(t.conteudo)}</div>
         <div class="tv-actions">
           <button class="btn-like${liked ? ' liked' : ''}" id="bbBtnLike" onclick="bbToggleLike('${id}')">▲ <span id="bbLikeCount">${nLike}</span></button>
+          <button class="btn-like" id="bbBtnCopiarLink" onclick="bbCopiarLink('${id}')">🔗 Copiar link</button>
           ${canDel ? `<button class="btn-del-topico" onclick="bbDeletarTopico('${id}')">Excluir tópico</button>` : ''}
         </div>`;
       await bbRenderComentarios(id);
@@ -3753,6 +3763,19 @@
     document.getElementById('bbViewTopico').style.display = 'none';
     document.getElementById('bbViewLista').style.display = 'block';
     bbTopicoId = null;
+    if (location.hash.startsWith('#topico=')) history.replaceState(null, '', location.pathname);
+  }
+  async function bbCopiarLink(id) {
+    const url = location.origin + location.pathname + '#topico=' + id;
+    const btn = document.getElementById('bbBtnCopiarLink');
+    try {
+      await navigator.clipboard.writeText(url);
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Link copiado!';
+      setTimeout(() => { btn.innerHTML = orig; }, 1800);
+    } catch (e) {
+      alert('Não consegui copiar automaticamente. Link: ' + url);
+    }
   }
 
   async function bbToggleLike(id) {
@@ -5625,6 +5648,16 @@
   iniCarregarLive();
   iniCarregarEmAlta();
   iniCarregarAds();
+
+  // ---- Link direto pra um tópico do Fórum (#topico=<id>) ----
+  (function abrirTopicoPorLink() {
+    const m = location.hash.match(/^#topico=(.+)$/);
+    if (!m) return;
+    const id = decodeURIComponent(m[1]);
+    goPage('forum');
+    goForumSub('topicos');
+    setTimeout(() => bbAbrirTopico(id), 300);
+  })();
 </script>
 </body>
 </html>
