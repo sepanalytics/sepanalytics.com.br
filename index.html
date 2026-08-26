@@ -1710,6 +1710,8 @@
         <input class="auth-inp" type="text" id="ytCanalNome" placeholder="Nome do canal"/>
         <input class="auth-inp" type="text" id="ytVideoUrl" placeholder="URL do vídeo (embed)"/>
         <input class="auth-inp" type="text" id="ytThumbUrl" placeholder="URL da thumbnail" style="grid-column:1/-1"/>
+        <label class="btn-auth-secondary" style="grid-column:1/-1;text-align:center">Enviar imagem da thumbnail<input type="file" accept="image/*" id="ytThumbUpload" style="display:none" onchange="admUploadThumbYoutube(this)"/></label>
+        <span class="text-xs text-muted-foreground" id="ytThumbUploadStatus" style="grid-column:1/-1"></span>
         <input class="auth-inp" type="text" id="ytCanalTextoTitulo" placeholder="Texto título do canal" style="grid-column:1/-1"/>
         <textarea class="auth-inp" id="ytCanalTextoDesc" placeholder="Descrição do canal" style="grid-column:1/-1;min-height:60px"></textarea>
         <input class="auth-inp" type="text" id="ytCanalLink" placeholder="Link do canal" style="grid-column:1/-1"/>
@@ -2836,6 +2838,20 @@
       });
     } catch (e) { console.error('admCarregarAdsForm', e); }
   }
+  async function admUploadThumbYoutube(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    const status = document.getElementById('ytThumbUploadStatus');
+    status.textContent = 'Enviando...';
+    const ext = file.name.split('.').pop();
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await sb.storage.from('home-ads').upload(path, file, { upsert: true });
+    if (error) { status.textContent = 'Erro ao enviar: ' + error.message + ' — confirma se rodou o SQL do bucket home-ads.'; input.value = ''; return; }
+    const { data } = sb.storage.from('home-ads').getPublicUrl(path);
+    document.getElementById('ytThumbUrl').value = data.publicUrl;
+    status.textContent = 'Imagem enviada! Clique em Salvar vídeo pra confirmar.';
+    input.value = '';
+  }
   async function admUploadAd(input, id) {
     const file = input.files?.[0];
     if (!file) return;
@@ -3628,6 +3644,13 @@
     const map = { 'criticas': 'criticas', 'reforcos': 'reforcos', 'base': 'base', 'resenha': 'resenha', 'analise': 'analise', 'pre-jogo': 'prejogo' };
     return map[norm] || 'geral';
   }
+  function bbSlugify(titulo) {
+    return (titulo || 'topico').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'topico';
+  }
+  function bbLinkTopico(id, titulo) {
+    return location.origin + location.pathname + '#topico=' + bbSlugify(titulo) + '-' + id;
+  }
 
   let bbTopicos = [], bbTopicosOriginal = [], bbCatAtiva = '', bbBusca = '', bbTopicoId = null, bbCapaFile = null, bbCatSelecionada = null, bbIniciado = false, bbCarregandoTopico = false;
   let bbPerfilAtual = null;
@@ -3711,7 +3734,6 @@
     if (bbCarregandoTopico) return;
     bbCarregandoTopico = true;
     bbTopicoId = id;
-    history.replaceState(null, '', '#topico=' + id);
     document.getElementById('bbViewLista').style.display = 'none';
     document.getElementById('bbViewTopico').style.display = 'block';
     const conteudoEl = document.getElementById('bbTopicoConteudo');
@@ -3721,6 +3743,7 @@
     try {
       const { data: t, error } = await bbQueryComTimeout(sb.from('bb_topicos').select('*, bb_perfis(nome, avatar_url)').eq('id', id).single());
       if (error) throw error;
+      history.replaceState(null, '', '#topico=' + bbSlugify(t.titulo) + '-' + id);
       let liked = false, nLike = 0;
       try {
         if (currentUser) {
@@ -3766,7 +3789,8 @@
     if (location.hash.startsWith('#topico=')) history.replaceState(null, '', location.pathname);
   }
   async function bbCopiarLink(id) {
-    const url = location.origin + location.pathname + '#topico=' + id;
+    const titulo = document.querySelector('.tv-titulo')?.textContent || '';
+    const url = bbLinkTopico(id, titulo);
     const btn = document.getElementById('bbBtnCopiarLink');
     try {
       await navigator.clipboard.writeText(url);
@@ -5653,7 +5677,7 @@
   (function abrirTopicoPorLink() {
     const m = location.hash.match(/^#topico=(.+)$/);
     if (!m) return;
-    const id = decodeURIComponent(m[1]);
+    const id = decodeURIComponent(m[1]).slice(-36);
     goPage('forum');
     goForumSub('topicos');
     setTimeout(() => bbAbrirTopico(id), 300);
